@@ -3,7 +3,7 @@ const isProduction = window.location.hostname !== "localhost";
 
 const API = axios.create({
   baseURL: isProduction
-    ? "https://railway.app" // 💡 تم إضافة https:// في البداية بأمان
+    ? "https://social-media-backend-production-7d92.up.railway.app/api/v1" 
     : "http://localhost:5000/api/v1",
   headers: {
     "Content-Type": "application/json",
