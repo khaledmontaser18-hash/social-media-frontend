@@ -1,0 +1,276 @@
+/* ==========================================================================
+   1. استدعاء الخطوط العالمية المخصصة للإعلانات والبراندنج الرقمي
+   ========================================================================== */
+@import url('https://googleapis.com');
+
+/* ==========================================================================
+   2. لوحة المتغيرات اللمسية الانسيابية للمظهرين (Light / Dark Premium)
+   ========================================================================== */
+:root, [data-theme="light"] {
+  --bg-global-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, #e2e8f0 100%);
+  --neon-blur-1: radial-gradient(circle, rgba(14, 165, 233, 0.18) 0%, rgba(14, 165, 233, 0) 70%);
+  --neon-blur-2: radial-gradient(circle, rgba(219, 39, 119, 0.12) 0%, rgba(219, 39, 119, 0) 70%);
+  
+  --glass-card-bg: rgba(255, 255, 255, 0.7);
+  --glass-card-border: rgba(226, 232, 240, 0.9);
+  --glass-card-shadow: 0 10px 40px -6px rgba(148, 163, 184, 0.15), inset 0 1px 4px rgba(255, 255, 255, 0.4);
+  
+  --text-main-custom: #0f172a;
+  --text-muted-custom: #64748b;
+  --input-bg-sub: rgba(248, 250, 252, 0.8);
+  --border-custom: #cbd5e1;
+  
+  --nav-gradient: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%);
+  --nav-text: #ffffff;
+  --neon-accent: #4f46e5;
+  --neon-accent-glow: rgba(79, 70, 229, 0.2);
+}
+
+[data-theme="dark"] {
+  --bg-global-gradient: linear-gradient(135deg, #060814 0%, #0b0b21 50%, #020208 100%);
+  --neon-blur-1: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(56, 189, 248, 0) 70%);
+  --neon-blur-2: radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, rgba(236, 72, 153, 0) 70%);
+  
+  --glass-card-bg: rgba(15, 23, 42, 0.55);
+  --glass-card-border: rgba(255, 255, 255, 0.07);
+  --glass-card-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.05);
+  
+  --text-main-custom: #f8fafc;
+  --text-muted-custom: #94a3b8;
+  --input-bg-sub: #070a14;
+  --border-custom: rgba(255, 255, 255, 0.1);
+  
+  --nav-gradient: linear-gradient(90deg, #1e1b4b 0%, #2e1065 100%);
+  --nav-text: #38bdf8;
+  --neon-accent: #38bdf8;
+  --neon-accent-glow: rgba(56, 189, 248, 0.4);
+}
+
+/* ==========================================================================
+   3. البنية الأساسية وعزل الخلفيات (Global Structural Setup)
+   ========================================================================== */
+body, html {
+  background: var(--bg-global-gradient) !important;
+  color: var(--text-main-custom) !important;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
+}
+
+/* الأنماط الخاصة بالتغذية الإخبارية والصفحة الشخصية حصرياً */
+.home-modern-view, .profile-modern-view {
+  min-height: 100vh; /* 💡 تم تصحيح الخطأ الإملائي هنا وكتابتها بصيغة برمجية صحيحة */
+  position: relative;
+  overflow-x: hidden;
+  z-index: 1;
+  background: transparent !important;
+}
+
+/* تطبيق تأثير الصورة الشبكية المتحركة في خلفية الهوم والبروفايل فقط دون إتلاف صفحات الـ Auth */
+.home-modern-view::before, .profile-modern-view::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-image: url('./assets/cyber-bg.png') !important;
+  background-size: cover !important;
+  background-position: right bottom !important;
+  background-repeat: no-repeat !important;
+  pointer-events: none;
+  z-index: -1;
+  animation: cyberNeonPulse 6s infinite ease-in-out alternate;
+}
+
+@keyframes cyberNeonPulse {
+  0% {
+    opacity: 0.55;
+    filter: brightness(0.8) drop-shadow(0 0 10px rgba(14, 165, 233, 0.1));
+  }
+  50% {
+    opacity: 0.8;
+    filter: brightness(1.1) drop-shadow(0 0 25px rgba(14, 165, 233, 0.3));
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1.3) drop-shadow(0 0 40px rgba(56, 189, 248, 0.5));
+    transform: scale(1.02);
+  }
+}
+
+/* ==========================================================================
+   4. تأمين وعزل خلفيات صفحات الـ Login والـ Register المظلمة الصارمة
+   ========================================================================== */
+.neon-wrapper {
+  background: linear-gradient(135deg, #090d16 0%, #111126 50%, #030712 100%) !important;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1;
+}
+
+.neon-wrapper::before {
+  content: ''; position: absolute; width: 450px; height: 450px;
+  background: radial-gradient(circle, #0ea5e9 0%, rgba(14, 165, 233, 0) 70%) !important;
+  top: 5%; right: -10%; opacity: 0.4; pointer-events: none; z-index: -1;
+}
+
+.neon-wrapper::after {
+  content: ''; position: absolute; width: 550px; height: 550px;
+  background: radial-gradient(circle, #6366f1 0%, rgba(99, 102, 241, 0) 70%) !important;
+  bottom: -10%; left: -10%; opacity: 0.3; pointer-events: none; z-index: -1;
+}
+
+.neon-glow-center {
+  position: absolute; width: 400px; height: 400px;
+  background: radial-gradient(circle, #d946ef 0%, rgba(217, 70, 239, 0) 70%) !important;
+  top: 35%; left: 25%; opacity: 0.2; pointer-events: none; z-index: -1;
+}
+
+/* عزل وتثبيت حجم كارت النيون البلوري المخصص لصفحات الدخول فقط لمنع بهتانه */
+.neon-wrapper .glass-panel {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(25px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 40px rgba(14, 165, 233, 0.2), 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.neon-wrapper .glass-panel h1, 
+.neon-wrapper .glass-panel span, 
+.neon-wrapper .glass-panel label, 
+.neon-wrapper .glass-panel a {
+  color: #ffffff !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ستايل صناديق الإدخال اللامعة لصفحات الدخول */
+.glass-input {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border-radius: 50px !important;
+  padding: 14px 24px !important;
+  transition: all 0.3s ease !important;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.5) !important;
+  color: #ffffff !important;
+}
+
+.glass-btn {
+  background: linear-gradient(90deg, #00b4db, #0083b0) !important;
+  border: none !important; color: #ffffff !important; border-radius: 50px !important;
+  padding: 14px !important; font-weight: 700 !important; letter-spacing: 1.5px !important;
+  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3) !important; transition: all 0.3s ease !important;
+}
+
+.glass-btn:hover {
+  background: linear-gradient(90deg, #00c6ff, #0072ff) !important;
+  box-shadow: 0 0 25px rgba(0, 198, 255, 0.7) !important; transform: scale(1.02);
+}
+
+/* ==========================================================================
+   5. شريط التصفح المستقل واللوجو الإعلاني (Premium Navbar & Logo)
+   ========================================================================== */
+/* ==========================================================================
+   5. شريط التصفح المستقل والتأثير الإعلاني للخط المتحرك والمتموج 3D
+   ========================================================================== *//* ==========================================================================
+   5. شريط التصفح المستقل والتأثير الإعلاني للخط (التحكم في الحركة والموجة 3D)
+   ========================================================================== */
+.glass-navbar {
+  background: var(--nav-gradient) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  padding: 12px 20px !important;
+}
+
+/* تهيئة حاوية اللوجو لتأثير الحروف */
+.glass-navbar .navbar-brand {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 1.9rem !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase;
+  color: #ffffff !important;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: flex !important;
+  align-items: center;
+  perspective: 1000px;
+  cursor: pointer;
+  text-decoration: none !important;
+}
+
+.glass-navbar .navbar-brand span {
+  display: inline-block;
+  transform-style: preserve-3d;
+  transition: color 0.3s ease;
+}
+
+/* 💡 تشغيل الحركة فقط عندما نقوم بتمرير الماوس (Hover) فوق الاسم */
+.glass-navbar .navbar-brand:hover span,
+/* 💡 أو تشغيل الحركة عندما يقوم كود الجافا سكريبت بحقن كلاس الـ animate تلقائياً كل فترة */
+.glass-navbar .navbar-brand.animate span {
+  animation: neonLetterRotate 1.2s ease-in-out;
+}
+
+/* التأخير الزمني المتقن لصناعة شكل الموجة التتابعية السلسة السريعة */
+.glass-navbar .navbar-brand:hover span:nth-child(1), .glass-navbar .navbar-brand.animate span:nth-child(1) { animation-delay: 0.05s; }
+.glass-navbar .navbar-brand:hover span:nth-child(2), .glass-navbar .navbar-brand.animate span:nth-child(2) { animation-delay: 0.10s; }
+.glass-navbar .navbar-brand:hover span:nth-child(3), .glass-navbar .navbar-brand.animate span:nth-child(3) { animation-delay: 0.15s; }
+.glass-navbar .navbar-brand:hover span:nth-child(4), .glass-navbar .navbar-brand.animate span:nth-child(4) { animation-delay: 0.20s; }
+.glass-navbar .navbar-brand:hover span:nth-child(5), .glass-navbar .navbar-brand.animate span:nth-child(5) { animation-delay: 0.25s; }
+.glass-navbar .navbar-brand:hover span:nth-child(6), .glass-navbar .navbar-brand.animate span:nth-child(6) { animation-delay: 0.30s; }
+.glass-navbar .navbar-brand:hover span:nth-child(7), .glass-navbar .navbar-brand.animate span:nth-child(7) { animation-delay: 0.35s; }
+.glass-navbar .navbar-brand:hover span:nth-child(8), .glass-navbar .navbar-brand.animate span:nth-child(8) { animation-delay: 0.40s; }
+
+/* جدول الحركة المصحح والسريع للدوران حول محور Y */
+@keyframes neonLetterRotate {
+  0% {
+    transform: rotateY(0deg) translateY(0);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    transform: rotateY(180deg) translateY(-6px);
+    text-shadow: 0 0 25px var(--neon-accent), 0 0 40px #ffffff;
+    color: var(--neon-accent) !important;
+  }
+  100% {
+    transform: rotateY(360deg) translateY(0);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* ==========================================================================
+   6. كروت وجداول العرض للموقع (Glass Panels Grid)
+   ========================================================================== */
+.card, .custom-bootstrap-card {
+  background: var(--glass-card-bg) !important;
+  backdrop-filter: blur(25px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(150%) !important;
+  border: 1px solid var(--glass-card-border) !important;
+  box-shadow: var(--glass-card-shadow) !important;
+  color: var(--text-main-custom) !important;
+  border-radius: 24px !important;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease !important;
+}
+
+.card:hover, .custom-bootstrap-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 45px var(--neon-accent-glow), var(--glass-card-shadow) !important;
+}
+
+.glass-textarea, .form-control, .comment-box-custom {
+  background: var(--input-bg-sub) !important;
+  border: 1px solid var(--border-custom) !important;
+  color: var(--text-main-custom) !important;
+  border-radius: 16px !important;
+}
+
+.post-timestamp, .text-muted, small { color: var(--text-muted-custom) !important; }
+.text-dark, h3, h4, h5, h6, p, span, label { color: var(--text-main-custom) !important; }
