@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMessages, sendMessageData } from "../features/chat/chatSlice";
 
 const ChatWindow = ({ participant, onClose }) => {
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.auth.user);
-  const { messages, loading } = useSelector((state) => state.chat);
+  const { messages: allMessages, loading } = useSelector((state) => state.chat);
   
   const [content, setContent] = useState("");
   const messagesEndRef = useRef(null);
@@ -17,10 +17,21 @@ const ChatWindow = ({ participant, onClose }) => {
     }
   }, [dispatch, participant?.id]);
 
+  // 💡 حل الأزمة: تصفية وتأمين مصفوفة الرسائل المعروضة لتعرض فقط الرسائل المتبادلة بينك وبين الشخص النشط حالياً حياً
+  const currentChatMessages = useMemo(() => {
+    if (!participant?.id || !currentUser?.id) return [];
+    return allMessages.filter(
+      (msg) =>
+        (msg.senderId === currentUser.id && msg.receiverId === participant.id) ||
+        (msg.senderId === participant.id && msg.receiverId === currentUser.id) ||
+        (msg.conversationId && allMessages.some(m => m.conversationId === msg.conversationId && (m.senderId === participant.id || m.receiverId === participant.id)))
+    );
+  }, [allMessages, participant?.id, currentUser?.id]);
+
   // تمرير التمرير التلقائي لأسفل الصندوق عند وصول رسائل جديدة
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [currentChatMessages]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -34,7 +45,6 @@ const ChatWindow = ({ participant, onClose }) => {
   };
 
   return (
-    /* 💡 تم تحويل الصندوق لنظام flex-column لضمان ظهور الـ Input في الأسفل بشكل دائم وعدم اختفائه */
     <div id="chat-window-container" className="position-fixed bottom-0 end-0 m-3 shadow-lg d-flex flex-column overflow-hidden text-start" 
          style={{ 
            width: "360px", 
@@ -49,7 +59,7 @@ const ChatWindow = ({ participant, onClose }) => {
            borderRadius: "20px"
          }}>
       
-      {/* رأس صندوق الشات (English Mode Header) */}
+      {/* رأس صندوق الشات */}
       <div className="bg-primary text-white p-3 d-flex align-items-center justify-content-between" style={{ borderBottom: "1px solid var(--glass-card-border)" }}>
         <div className="d-flex align-items-center">
           <img 
@@ -62,19 +72,20 @@ const ChatWindow = ({ participant, onClose }) => {
         </div>
         <button className="btn-close btn-close-white btn-sm" onClick={onClose} type="button"></button>
       </div>
-      {/* منطقة عرض فقاعات الرسائل - تم ضبط الـ flex-grow لتأخذ المساحة الوسطى بالكامل */}
+
+      {/* منطقة عرض فقاعات الرسائل المصفاة حياً */}
       <div className="p-3 flex-grow-1" style={{ overflowY: "auto", background: "transparent" }}>
         {loading && <div className="text-center text-muted pt-5">Fetching messages...</div>}
         
-        {!loading && messages.length === 0 && (
+        {!loading && currentChatMessages.length === 0 && (
           <div className="text-center text-muted pt-5" style={{ fontSize: "13px" }}>👋 Say hello to start the conversation!</div>
         )}
 
-        {!loading && messages.map((msg) => {
+        {!loading && currentChatMessages.map((msg, index) => {
           const isMe = msg.senderId === currentUser?.id;
           return (
             <div 
-              key={msg.id} 
+              key={msg.id || index} 
               className={`d-flex mb-2 ${isMe ? "justify-content-end" : "justify-content-start"}`}
             >
               <div 
@@ -97,7 +108,7 @@ const ChatWindow = ({ participant, onClose }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 💡 صندوق إدخال النص المطور والمثبت في نهاية الكارت الزجاجي ليظهر دائماً بنجاح */}
+      {/* صندوق إدخال النص */}
       <form onSubmit={handleSend} className="d-flex border-top p-2 w-100 align-items-center" style={{ borderColor: "var(--glass-card-border)", background: "rgba(0,0,0,0.02)" }}>
         <input
           type="text"
