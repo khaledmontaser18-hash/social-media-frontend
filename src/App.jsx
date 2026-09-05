@@ -57,8 +57,8 @@ function App() {
     return () => {
       socket.off("new_notification");
       socket.off("receive_message");
-     
-    };
+      socket.disconnect();
+         };
   }, [user, dispatch]);
 
   return (
