@@ -38,21 +38,21 @@ const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    // 💡 تم إضافة الريدوسر الحاسم لفتح صندوق المحادثة عند الضغط على زر مراسلة
+    // فتح صندوق المحادثة عند الضغط على زر مراسلة
     openChatWithParticipant: (state, action) => {
       state.activePartner = action.payload;
     },
-    // دالة استقبال الرسائل الحية من السوكت
+    // 💡 تم إصلاح الدالة: تحديث مصفوفة الرسائل بمرجع ذاكرة جديد تماماً لفرض الرندرة اللحظية أونلاين
     addLiveMessage: (state, action) => {
       const messageExists = state.messages.some((m) => m.id === action.payload.id);
       if (!messageExists) {
-        state.messages.push(action.payload);
+        state.messages = [...state.messages, action.payload];
       }
     },
     // تنظيف المحادثة وغلق الصندوق
     clearChat: (state) => {
       state.messages = [];
-      state.activePartner = null; // تصفير الطرف الآخر لغلق النافذة بصرياً
+      state.activePartner = null; 
     }
   },
   extraReducers: (builder) => {
@@ -63,8 +63,9 @@ const chatSlice = createSlice({
         state.messages = action.payload;
       })
       .addCase(fetchMessages.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+      // 💡 تم إصلاح الإرسال أيضاً: إنشاء مصفوفة جديدة تماماً لضمان نزول الرسالة التي أرسلتها أنت فوراً
       .addCase(sendMessageData.fulfilled, (state, action) => {
-        state.messages.push(action.payload);
+        state.messages = [...state.messages, action.payload];
       });
   },
 });
