@@ -3,8 +3,8 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom"; 
 import { io } from "socket.io-client";
 import api from "../config/axios";
-
-const socket = io("http://localhost:5000", { autoConnect: false });
+import socket from "../config/socket";
+// const socket = io("http://localhost:5000", { autoConnect: false });
 
 const NotificationsDropdown = () => {
   const navigate = useNavigate(); 
