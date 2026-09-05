@@ -1,8 +1,16 @@
 import { io } from "socket.io-client";
 
-// إنشاء اتصال مع سيرفر السوكت في الباك-إند
-const socket = io("http://localhost:5000", {
-  autoConnect: false, // نجعله false لنقوم بتشغيله يدوياً فور تأكيد هوية المستخدم
-});
+// يكتشف تلقائياً هل الموقع يعمل حياً أونلاين أم محلياً على جهازك
+const isProduction = window.location.hostname !== "localhost";
+
+// 💡 حل الأزمة: ربط السوكت برابط سيرفر الـ Railway الفعلي والحقيقي أونلاين
+const socket = io(isProduction 
+  ? "https://social-media-backend-production-7d92.up.railway.app/api/v1" 
+  : "http://localhost:5000", 
+  {
+    autoConnect: false, // يظل false ويتم تشغيله ذكياً في App.jsx فور الدخول
+    transports: ["websocket", "polling"], // دعم الـ Polling والـ Websocket معاً لضمان الاستقرار السحابي تماماً
+  }
+);
 
 export default socket;
