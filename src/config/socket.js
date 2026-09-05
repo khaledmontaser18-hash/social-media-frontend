@@ -5,7 +5,7 @@ const isProduction = window.location.hostname !== "localhost";
 
 // 💡 حل الأزمة: ربط السوكت برابط سيرفر الـ Railway الفعلي والحقيقي أونلاين
 const socket = io(isProduction 
-  ? "https://social-media-backend-production-7d92.up.railway.app/api/v1" 
+  ? "https://social-media-backend-production-7d92.up.railway.app/api" 
   : "http://localhost:5000", 
   {
     autoConnect: false, // يظل false ويتم تشغيله ذكياً في App.jsx فور الدخول
