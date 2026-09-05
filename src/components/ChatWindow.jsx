@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMessages, sendMessageData } from "../features/chat/chatSlice";
+// 💡 تم التعديل: استدعاء دالة addLiveMessage لإضافة الرسائل اللحظية للريدوكس فوراً
+import { fetchMessages, sendMessageData, addLiveMessage } from "../features/chat/chatSlice";
+// 💡 تم التعديل: استيراد ملف السوكيت الموحد والذكي الخاص بمشروعك
+import socket from "../config/socket"; 
 
 const ChatWindow = ({ participant, onClose }) => {
   const dispatch = useDispatch();
@@ -10,14 +13,38 @@ const ChatWindow = ({ participant, onClose }) => {
   const [content, setContent] = useState("");
   const messagesEndRef = useRef(null);
 
-  // جلب الرسائل فوراً عند فتح نافذة المحادثة
+  // جلب الرسائل فوراً عند فتح نافذة المحادثة من قاعدة البيانات
   useEffect(() => {
     if (participant?.id) {
       dispatch(fetchMessages(participant.id));
     }
   }, [dispatch, participant?.id]);
 
-  // 💡 حل الأزمة: تصفية وتأمين مصفوفة الرسائل المعروضة لتعرض فقط الرسائل المتبادلة بينك وبين الشخص النشط حالياً حياً
+  // 💡 حل الأزمة: الإنصات واستقبال رسائل الشات اللحظية عبر السوكيت أونلاين
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    // التأكد من اتصال السوكيت بسيرفر Railway
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    // التأكد من انضمام المستخدم لغرفته الشخصية لاستلام الرسائل الموجهة له
+    socket.emit("join_room", currentUser.id);
+
+    // الإنصات لحدث استقبال رسالة جديدة المكتوب في الباك-إند لديك
+    socket.on("receive_message", (newMessage) => {
+      // تمرير الرسالة فوراً إلى الريدوكس لتحديث واجهة الشات تلقائياً أمام المستخدم
+      dispatch(addLiveMessage(newMessage));
+    });
+
+    // تنظيف المستمع عند إغلاق النافذة منعاً لتكرار الرسائل وتداخلها
+    return () => {
+      socket.off("receive_message");
+    };
+  }, [dispatch, currentUser?.id]);
+
+  // تصفية وتأمين مصفوفة الرسائل المعروضة لتعرض فقط الرسائل المتبادلة بينك وبين الشخص النشط حالياً حياً
   const currentChatMessages = useMemo(() => {
     if (!participant?.id || !currentUser?.id) return [];
     return allMessages.filter(
@@ -37,10 +64,12 @@ const ChatWindow = ({ participant, onClose }) => {
     e.preventDefault();
     if (!content.trim()) return;
 
+    // إرسال الرسالة للباك-إند لحفظها في قاعدة البيانات عبر الـ API
     await dispatch(sendMessageData({
       receiverId: participant.id,
       content: content.trim()
     }));
+    
     setContent("");
   };
 
