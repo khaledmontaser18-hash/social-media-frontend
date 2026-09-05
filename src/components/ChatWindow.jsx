@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMessages, sendMessageData } from "../features/chat/chatSlice";
 
 const ChatWindow = ({ participant, onClose }) => {
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.auth.user);
-  
-  // 💡 نعود لقراءة مصفوفة الرسائل المباشرة والأصلية من الـ Redux بدون أي فلاتر معقدة تفشل أونلاين
-  const { messages, loading } = useSelector((state) => state.chat);
+  const { messages: allMessages, loading } = useSelector((state) => state.chat);
   
   const [content, setContent] = useState("");
   const messagesEndRef = useRef(null);
@@ -19,10 +17,21 @@ const ChatWindow = ({ participant, onClose }) => {
     }
   }, [dispatch, participant?.id]);
 
+  // 💡 حل الأزمة: تصفية وتأمين مصفوفة الرسائل المعروضة لتعرض فقط الرسائل المتبادلة بينك وبين الشخص النشط حالياً حياً
+  const currentChatMessages = useMemo(() => {
+    if (!participant?.id || !currentUser?.id) return [];
+    return allMessages.filter(
+      (msg) =>
+        (msg.senderId === currentUser.id && msg.receiverId === participant.id) ||
+        (msg.senderId === participant.id && msg.receiverId === currentUser.id) ||
+        (msg.conversationId && allMessages.some(m => m.conversationId === msg.conversationId && (m.senderId === participant.id || m.receiverId === participant.id)))
+    );
+  }, [allMessages, participant?.id, currentUser?.id]);
+
   // تمرير التمرير التلقائي لأسفل الصندوق عند وصول رسائل جديدة
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [currentChatMessages]);
 
   const handleSend = async (e) => {
     e.preventDefault();
