@@ -17,14 +17,13 @@ const ChatWindow = ({ participant, onClose }) => {
     }
   }, [dispatch, participant?.id]);
 
-  // 💡 حل الأزمة: تصفية وتأمين مصفوفة الرسائل المعروضة لتعرض فقط الرسائل المتبادلة بينك وبين الشخص النشط حالياً حياً
+  // 💡 إصلاح الفخ السحابي: فلتر مرن يعتمد بالملي على الأطراف النشطة لضمان التقاط رسائل السوكت حياً فوراً
   const currentChatMessages = useMemo(() => {
     if (!participant?.id || !currentUser?.id) return [];
     return allMessages.filter(
       (msg) =>
         (msg.senderId === currentUser.id && msg.receiverId === participant.id) ||
-        (msg.senderId === participant.id && msg.receiverId === currentUser.id) ||
-        (msg.conversationId && allMessages.some(m => m.conversationId === msg.conversationId && (m.senderId === participant.id || m.receiverId === participant.id)))
+        (msg.senderId === participant.id && msg.receiverId === currentUser.id)
     );
   }, [allMessages, participant?.id, currentUser?.id]);
 
