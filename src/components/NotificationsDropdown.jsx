@@ -41,7 +41,7 @@ const NotificationsDropdown = () => {
 
     return () => {
       socket.off("new_notification");
-      socket.disconnect();
+     
     };
   }, [user]);
 

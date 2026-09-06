@@ -36,8 +36,13 @@ function App() {
   // 3. إدارة الويب سوكت (Socket.io) للإشعارات والرسائل الحية بدون تكرار
   useEffect(() => {
     if (user && user.id) {
-      socket.connect();
+      if (!socket.connected) {
+        socket.connect();
+      }
       socket.emit("join_room", user.id);
+      console.log(`[SOCKET SUCCESS] ROOM JOINED: ${user.id}`)
+socket.off("new_notification");
+      socket.off("receive_message");
 
       socket.on("new_notification", (notification) => {
         dispatch(addLiveNotification(notification));
@@ -57,9 +62,9 @@ function App() {
     return () => {
       socket.off("new_notification");
       socket.off("receive_message");
-      socket.disconnect();
+  
          };
-  }, [user, dispatch]);
+  }, [user?.id, dispatch]);
 
   return (
     <Router>
