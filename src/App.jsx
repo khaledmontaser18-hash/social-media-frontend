@@ -10,7 +10,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
-import PostDetailsPage from "./pages/PostDetailsPage"; // 💡 تم إضافة استيراد صفحة التفاصيل الجديدة
+import PostDetailsPage from "./pages/PostDetailsPage"; 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import SearchResults from "./pages/SearchResults";
 import ChatWindow from "./components/ChatWindow";
@@ -33,38 +33,44 @@ function App() {
     }
   }, [dispatch, token]);
 
-  // 3. إدارة الويب سوكت (Socket.io) للإشعارات والرسائل الحية بدون تكرار
+  // 3. 💡 تم الإصلاح الجذري: إدارة الويب سوكت بشكل نقي ومستقر يمنع التعليق والتجمد نهائياً عند إغلاق وفتح الشات
   useEffect(() => {
     if (user && user.id) {
       if (!socket.connected) {
         socket.connect();
       }
       socket.emit("join_room", user.id);
-      console.log(`[SOCKET SUCCESS] ROOM JOINED: ${user.id}`)
-socket.off("new_notification");
+      console.log(`[SOCKET SUCCESS] ROOM JOINED: ${user.id}`);
+
+      // تنظيف كامل وصارم للمستمعين القدامى لتجنب تكرار وتراكم الأحداث (Event Leak)
+      socket.off("new_notification");
       socket.off("receive_message");
 
+      // الاستماع لحدث استقبال الإشعارات الحية وضخها بالريدوكس فوراً
       socket.on("new_notification", (notification) => {
         dispatch(addLiveNotification(notification));
       });
 
+      // الاستماع لحدث استقبال الرسائل الحية ومعالجتها بذكاء هندسي نقي
       socket.on("receive_message", (message) => {
         console.log("Live Message Received!:", message);
+        
+        // أ. حقن الرسالة في مصفوفة الريدوكس لتحديث شاشة المحادثة الحالية فوراً
         dispatch(addLiveMessage(message));
         
-        const isChatWindowOpen = document.getElementById("chat-window-container");
-        
-        if (!isChatWindowOpen && message.sender) {
+        // ب. نفتح صندوق الشات تلقائياً فقط إذا كان الشات مغلقاً حالياً بالريدوكس،
+        // وبشرط صارم جداً أن الرسالة قادمة من الطرف الآخر (ليست من حسابي الحالي) لمنع القفل التنازعي للـ State
+        if (!activeChatPartner && message.sender && message.senderId !== user.id) {
           dispatch(openChatWithParticipant(message.sender));
         }
       });
     }
+    
     return () => {
       socket.off("new_notification");
       socket.off("receive_message");
-  
-         };
-  }, [user?.id, dispatch]);
+    };
+  }, [user?.id, dispatch, activeChatPartner]); // 💡 تتبع حالة activeChatPartner يضمن دقة الفحص الفوري للريدوكس
 
   return (
     <Router>
@@ -77,7 +83,7 @@ socket.off("new_notification");
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/search" element={<SearchResults />} />
           
-          {/* 💡 المسار المضاف المسؤول عن استقبال واستعراض بوست فردي محدد */}
+          {/* المسار المسؤول عن استقبال واستعراض بوست فردي محدد */}
           <Route path="/posts/:id" element={<PostDetailsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
